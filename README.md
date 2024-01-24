@@ -29,3 +29,10 @@ L'API doit donc être en mesure de retourner ce nombre de questions. Comme l'app
 
 Les utilisateurs devant avoir créé un compte, il faut que nous soyons en mesure de vérifier leurs identifiants. 
 Pour l'instant l'API utilise une authentification basique, à base de nom d'utilisateur et de mot de passe: la chaîne de caractères contenant Basic username:password devra être passée dans l'en-tête Authorization (en théorie, cette chaîne de caractère devrait être encodée mais pour simplifier l'exercice, on peut choisir de ne pas l'encoder)
+
+L'API devra aussi implémenter un point de terminaison pour vérifier que l'API est bien fonctionnelle. Une autre fonctionnalité doit pouvoir permettre à un utilisateur admin dont le mot de passe est 4dm1N de créer une nouvelle question.
+
+Enfin, elle devra être largement documentée et devra renvoyer des erreurs lorsque celle-ci est mal appelée.
+
+## Rendus
+Les attendus sont un ou plusieurs fichiers Python contenant le code de l'API et un fichier contenant les requêtes à effectuer pour tester l'API. On pourra aussi fournir un fichier requirements.txt listant les librairies à installer. Enfin, vous pouvez fournir un document expliquant les choix d'architecture effectués.
