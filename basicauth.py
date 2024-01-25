@@ -22,7 +22,6 @@ users = {
                 "admin": "4dm1N"
 }
 
-#Je completerais avec une versions des users en BaseModel plus tard
 
 def is_identified(credentials: HTTPBasicCredentials = Depends(security)):
     for user, passwd in users.items():
@@ -41,6 +40,26 @@ def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
         )
     return credentials.username
 
+def is_admin(credentials: HTTPBasicCredentials = Depends(security)):
+    
+    if not secrets.compare_digest(credentials.username, "admin"):
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "Access to the requested resource is forbidden for the current user",
+            headers = {"WWW-Authenticate" : "Basic"},
+        )
+    else :
+        if not is_identified(credentials) : 
+            raise HTTPException(
+                status_code = status.HTTP_401_UNAUTHORIZED,
+                detail = "Incorrect email or password",
+                headers = {"WWW-Authenticate" : "Basic"},
+            )
+    return credentials.username
+#####
+#### exemple avec BaseModel 
+#Je completerais avec une versions des users en BaseModel plus tard
+
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     username = credentials.username
     if not(users.get(username)) or not(pwd_context.verify(credentials.password, users[username]['hashed_password'])):
@@ -56,3 +75,29 @@ On récupère l'identifiant et le mot de passe de l'utilisateur grâce aux attri
 On vérifie si l'identifiant est présent dans la base de données. 
 Ensuite, on compare si le mot de passe crypté correspond bien à celui de la base de données en utilisant la méthode verify de la variable pwd_context. 
 On lève une erreur 401 si ils ne correspondent pas. Sinon, on renvoie l'identifiant de l'utilisateur.'''
+'''
+#dictionnaire user basique
+users_db = [
+    {
+        'user_index': 1,
+        'name': 'Alice',
+        'password': 'wonderland'
+    },
+    {
+        'user_index': 2,
+        'name': 'Bob',
+        'password': 'builder'
+    },
+    {
+        'user_index': 3,
+        'name': 'Clementine',
+        'password': 'mandarine'
+    },
+    {
+        'user_index': 0,
+        'name': 'admin',
+        'password': '4dm1N'
+    }
+]
+
+'''
