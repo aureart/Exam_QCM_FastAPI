@@ -26,13 +26,13 @@ async def get_index():
 
 
 @app.get('/check_fonctionnel')
-async def check():
+async def check(qui: str = Depends(auth.is_identified)):
     available_questions = "Non disponible"
     try:
         # Tentative de connexion au fichier csv
         available_questions =  db.get_nb_questions()
         df_status = "Connecté"
-        qui : str = Depends(auth.get_current_username)
+        
     except Exception as e:
         df_status = f"Erreur: {e}"
     return {
@@ -45,6 +45,5 @@ async def check():
 async def authenticate_user(username: str = Depends(auth.get_current_username)):
 
     return {
-        'response_code':0,
-        'results': username
+                'results': username
     }
