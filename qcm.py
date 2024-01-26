@@ -22,8 +22,5 @@ def get_qcm (use: str, subjects: list, nbr: int) -> list:
     mylist = db.get_questions(use, subjects)
     if not mylist:
         raise HTTPException(status_code=404, detail="Aucune question trouvée pour les critères donnés.")
-        return mylist
-    if len(mylist)>nbr:
-        return random.sample(mylist, nbr)
-    else :
-        return mylist
+    random.shuffle(mylist)  # Mélanger la liste pour une distribution aléatoire
+    return mylist[:nbr]  # Retourner les premières 'nbr' questions
