@@ -17,30 +17,36 @@ def export_df(df, file_name):
     return True 
 
 def prepare_dataset(file_name: str):
-    df = pd.read_csv(file_name)
-    if 'Unnamed: 0.1' not in df.columns : 
-        return True
-    else :
-        df.rename(columns={'Unnamed: 0':'index'}, inplace=True)
-        df.drop('Unnamed: 0.1', axis=1, inplace=True)
+    try:
+        df = pd.read_csv(file_name)
+        if 'Unnamed: 0.1' in df.columns:
+            df.rename(columns={'Unnamed: 0':'index'}, inplace=True)
+            df.drop('Unnamed: 0.1', axis=1, inplace=True)
         export_state = export_df(df, file_name)
         return export_state
+    except pd.errors.EmptyDataError:
+        print("Erreur : Le fichier CSV est vide.")
+        return False
+    except FileNotFoundError:
+        print("Erreur : Fichier non trouvé.")
+        return False
+    except Exception as e:
+        print(f"Erreur inattendue : {e}")
+        return False
 
 def initialise_df() -> bool:
     df = pd.read_csv('questions.csv')
     return df
 
 def get_df():
-    try:
-        df
-    except NameError:
+    if not os.path.isfile('questions.csv'):
         prepare_dataset('questions.csv')
-        df = initialise_df()
-    return df
+    return pd.read_csv('questions.csv')
 
 
 def get_nb_questions():
-    df = pd.read_csv('questions.csv')# ou df = get_df()
+    #df = pd.read_csv('questions.csv')# ou df = get_df()
+    df = get_df()
     return df.shape[0] 
 
 def get_uses():
@@ -60,7 +66,7 @@ def get_questions(use: str, subjects: list) -> list:
     return mylist
 
 def add_question(question: str, subject: str, use: str, correct: str,\
-                 responseA: str, responseB: str, responseC: str, responseD: str) -> bool:
+                 responseA: str, responseB: str, responseC: str, responseD: Optional[str] = None) -> bool:
     df = get_df()
     new_row = {'question':question, 'subject':subject, 'use':use, 'correct':correct,\
                'responseA': responseA, 'responseB': responseB, \
