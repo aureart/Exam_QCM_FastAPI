@@ -48,9 +48,11 @@ async def authenticate_user(username: str = Depends(auth.get_current_username)):
                 'results': username
     }
 
-# -----------------------------------------------
-@app.post("/add_question")
+# --------use et subject identique a la liste actuelle------------------------------------------
+# --------je peux faire un aure methode pour creer une question sur un nouveau sujet ou use-----
+@app.post("/ajout_question")
 async def post_question(
+    # Query parameters
     question: str, subject: str, correct: str, use: str,
     responseA: str, responseB: str, responseC: str, responseD: Optional[str] = None,
     username: str = Depends(auth.is_admin)
@@ -62,7 +64,7 @@ async def post_question(
     if subject not in valid_subjects:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Le sujet n'est pas valide.")
     if use not in valid_uses:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="L'utilisation spécifiée n'est pas valide.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Le use  n'est pas valide.")
 
     # Tentative d'ajout de la question
     try:
@@ -82,3 +84,75 @@ async def post_question(
         }
     }
 
+# ----------------------------------------
+# Conna^tre les use disponibles
+# --------------------------------------------
+@app.get("/uses")
+async def get_uses(username: str = Depends(auth.is_identified)):
+    available_uses = db.get_uses()
+    return {
+        
+        'results': available_uses
+    }
+# ---------------------
+
+
+# --------------------------------------------
+# Conna^tre les sujets disponibles
+# --------------------------------------------
+@app.get("/subjects")
+async def get_subjects(username: str = Depends(auth.is_identified)):
+    available_subjects = db.get_subjects()
+    return {
+        
+        'results': available_subjects
+    }
+
+
+#-----------------------------------------------
+@app.get("/qcm/")
+async def get_qcm(
+    # Query parameters
+        number: int = Query(
+                  5,
+                  title = "Number (Nombre de questions)",
+                  description = "Choisir entre les nombres suivants :  [5, 10, 20]",
+
+              ), 
+        use:  str = Query(
+                 #db.get_uses(),
+                 "Test de positionnement",
+                 title = "Use (type de questions)",
+                 description = f"Use, <br> \
+                                 {db.get_uses()}",
+  
+             ), 
+        subjects: 
+              Optional[List[str]] = Query(
+                  db.get_subjects(),
+                  title = "Subject ",
+                  description = "Optionnel : choisir un sujet.",
+
+              ), 
+        username: str = Depends(auth.is_identified)
+    ):
+    valid_numbers = [5, 10, 20]
+    valid_qcm_subjects = db.get_subjects()
+    valid_uses = db.get_uses()
+    if number not in valid_numbers:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Choisir un chiffre entre 5,10 ou 20 svp")
+    #if subjects not in valid_qcm_subjects:
+    #    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Le sujet n'est pas valide.")
+    if use not in valid_uses:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Le use  n'est pas valide.")
+
+    results = qcm.get_qcm(use, subjects, int(number))
+    return {
+        'results':{
+                      "use": use,
+                      "subject": subjects,
+                      "number": int(number),
+                      "results": results
+        }
+            
+    }
