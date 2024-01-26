@@ -59,11 +59,10 @@ def get_subjects():
 
 def get_questions(use: str, subjects: list) -> list:
     df = pd.read_csv('questions.csv')
-
-    mylist = df[(df.use == use) & 
-                (df.subject.isin(subjects))
-             ].question.tolist()
-    return mylist
+    filtered_questions = df[(df.use == use) & (df.subject.isin(subjects))].question.tolist()
+    #if not filtered_questions:
+    #    raise HTTPException(status_code=404, detail="Aucune question trouvée pour les critères donnés.")
+    return filtered_questions
 
 def add_question(question: str, subject: str, use: str, correct: str,\
                  responseA: str, responseB: str, responseC: str, responseD: Optional[str] = None) -> bool:
@@ -74,3 +73,4 @@ def add_question(question: str, subject: str, use: str, correct: str,\
     df = df.append(new_row, ignore_index=True)
     export_state = export_df(df, 'questions.csv')
     return True
+ 
