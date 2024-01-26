@@ -6,15 +6,19 @@
 import os
 import pandas as pd
 import numpy as np
+from  fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 
 
 def export_df(df, file_name):
-    if os.path.isfile(file_name):
-        os.remove(file_name)
-    df.to_csv(file_name)
-    return True 
+    try:
+        if os.path.isfile(file_name):
+            os.remove(file_name)
+            df.to_csv(file_name)
+            return True 
+    except Exception as e:
+            print(f"Erreur lors de l'exportation du DataFrame : {e}")
 
 def prepare_dataset(file_name: str):
     try:
@@ -59,7 +63,10 @@ def get_subjects():
 
 def get_questions(use: str, subjects: list) -> list:
     df = pd.read_csv('questions.csv')
-    filtered_questions = df[(df.use == use) & (df.subject.isin(subjects))].question.tolist()
+    if subjects:  # Si la liste des sujets n'est pas vide
+        filtered_questions = df[(df.use == use) & (df.subject.isin(subjects))].question.tolist()
+    else:  # Si la liste des sujets est vide
+        filtered_questions = df[df.use == use].question.tolist()
     #if not filtered_questions:
     #    raise HTTPException(status_code=404, detail="Aucune question trouvée pour les critères donnés.")
     return filtered_questions
