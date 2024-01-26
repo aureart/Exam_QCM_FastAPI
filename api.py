@@ -114,35 +114,36 @@ async def get_subjects(username: str = Depends(auth.is_identified)):
 async def get_qcm(
     # Query parameters
         number: int = Query(
-                  5,
-                  title = "Number (Nombre de questions)",
-                  description = "Choisir entre les nombres suivants :  [5, 10, 20]",
+                5,
+                title = "Number (Nombre de questions)",
+                description = "Choisir entre les nombres suivants :  [5, 10, 20]",
 
               ), 
         use:  str = Query(
-                 #db.get_uses(),
-                 "Test de positionnement",
-                 title = "Use (type de questions)",
-                 description = f"Use, <br> \
+                #db.get_uses(),
+                "Test de positionnement",
+                title = "Use",
+                description = f"Use, <br> \
                                  {db.get_uses()}",
   
              ), 
-        subjects: 
-              Optional[List[str]] = Query(
-                  db.get_subjects(),
-                  title = "Subject ",
-                  description = "Optionnel : choisir un sujet.",
+        subjects: Optional[List[str]] = Query(
+                None,
+                title = "Subject ",
+                description= f"Sujet, <br> \
+                                 {db.get_subjects()}",
 
               ), 
         username: str = Depends(auth.is_identified)
-    ):
+):
     valid_numbers = [5, 10, 20]
     valid_qcm_subjects = db.get_subjects()
     valid_uses = db.get_uses()
     if number not in valid_numbers:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Choisir un chiffre entre 5,10 ou 20 svp")
-    #if subjects not in valid_qcm_subjects:
-    #    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Le sujet n'est pas valide.")
+    if subjects and not all(subject in valid_qcm_subjects for subject in subjects):
+        return subjects
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Le sujet n'est pas valide.")
     if use not in valid_uses:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Le use  n'est pas valide.")
 
